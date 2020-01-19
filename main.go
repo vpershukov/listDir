@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"strconv"
-	"math"
 )
 
 var (
@@ -17,22 +17,21 @@ var (
 
 func hrSize(fsize int) string {
 	if fsize < 1048576 {
-		finalFsize := int(math.Ceil(float64(fsize)/1024))
-		return strconv.Itoa(finalFsize) + "KB"
+		fsize = int(math.Ceil(float64(fsize) / 1024))
+		return strconv.Itoa(fsize) + "KB"
 	} else {
-		finalFsize := int(math.Ceil(float64(fsize)/(1048576)))
-		return strconv.Itoa(finalFsize) + "MB"
+		fsize = int(math.Ceil(float64(fsize) / (1048576)))
+		return strconv.Itoa(fsize) + "MB"
 	}
 }
 
 func printAll(file os.FileInfo) {
 	time := file.ModTime().Format("Jan 06 15:4")
-	fSize := int(file.Size())
+	fSize := strconv.Itoa(int(file.Size()))
 	if *h {
-		fmt.Printf("%s %s %s \n", hrSize(fSize), time, file.Name())
-	} else {
-		fmt.Printf("%s %s %s \n", fSize, time, file.Name())
+		fSize = hrSize(int(file.Size()))
 	}
+	fmt.Printf("%s %s %s \n", fSize, time, file.Name())
 }
 
 func main() {

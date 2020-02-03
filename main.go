@@ -14,7 +14,7 @@ var (
 	d = flag.String("d", ".", "Directory to process")
 	a = flag.Bool("a", false, "Print all info")
 	h = flag.Bool("h", false, "File size converter")
-	sorted = flag.Bool("sort", false, "Output through sorting")
+	sorted = flag.String("sort", "", "Output through sorting. Use 'size' or 'date' parameter")
 )
 
 
@@ -32,6 +32,23 @@ func (ss *SortedBySize) Less(i int, j int) bool {
 
 func (ss *SortedBySize) Swap(i int, j int) {
 	ss.files[i], ss.files[j] = ss.files[j], ss.files[i]
+}
+
+
+type SortByDate struct {
+	files []os.FileInfo
+}
+
+func (sd *SortByDate) Len() int {
+	return len(sd.files)
+}
+
+func (sd *SortByDate) Less(i int, j int) bool {
+	return sd.files[i].ModTime().Unix() < sd.files[j].ModTime().Unix()
+}
+
+func (sd *SortByDate) Swap(i int, j int) {
+	sd.files[i], sd.files[j] = sd.files[j], sd.files[i]
 }
 
 
@@ -58,9 +75,11 @@ func printAll(file os.FileInfo) {
 func main() {
 	flag.Parse()
 	files, _ := ioutil.ReadDir(*d)
-	sortedFiles := SortedBySize{files}
-	if *sorted == true {
-		sort.Sort(&sortedFiles)
+	
+	if *sorted == "size" {
+		sort.Sort(&SortedBySize{files})
+	} else if *sorted == "date" {
+		sort.Sort(&SortByDate{files})
 	}
 
 	for _, file := range files {

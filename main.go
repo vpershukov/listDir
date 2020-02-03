@@ -35,19 +35,19 @@ func (ss *SortedBySize) Swap(i int, j int) {
 }
 
 
-type SortByDate struct {
+type SortedByDate struct {
 	files []os.FileInfo
 }
 
-func (sd *SortByDate) Len() int {
+func (sd *SortedByDate) Len() int {
 	return len(sd.files)
 }
 
-func (sd *SortByDate) Less(i int, j int) bool {
+func (sd *SortedByDate) Less(i int, j int) bool {
 	return sd.files[i].ModTime().Unix() < sd.files[j].ModTime().Unix()
 }
 
-func (sd *SortByDate) Swap(i int, j int) {
+func (sd *SortedByDate) Swap(i int, j int) {
 	sd.files[i], sd.files[j] = sd.files[j], sd.files[i]
 }
 
@@ -74,12 +74,17 @@ func printAll(file os.FileInfo) {
 
 func main() {
 	flag.Parse()
-	files, _ := ioutil.ReadDir(*d)
-	
+	files, err := ioutil.ReadDir(*d)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
 	if *sorted == "size" {
 		sort.Sort(&SortedBySize{files})
 	} else if *sorted == "date" {
-		sort.Sort(&SortByDate{files})
+		sort.Sort(&SortedByDate{files})
 	}
 
 	for _, file := range files {
